@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -ex
+
+/usr/local/bin/wrapdocker &
+
+exec bash -ex /usr/local/bin/setup-sshd $@
+
