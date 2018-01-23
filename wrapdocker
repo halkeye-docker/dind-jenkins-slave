@@ -88,13 +88,14 @@ rm -rf /var/run/docker.pid
 if [ "$DOCKER_PORT" ]
 then
 	exec dockerd -H 0.0.0.0:$DOCKER_PORT -H unix://var/run/docker.sock \
+    --storage-driver overlay2 \
 		$DOCKER_DAEMON_ARGS
 else
 	if [ "$LOG" == "file" ]
 	then
-		dockerd $DOCKER_DAEMON_ARGS &>/var/log/docker.log &
+		dockerd $DOCKER_DAEMON_ARGS --storage-driver overlay2 &>/var/log/docker.log &
 	else
-		dockerd $DOCKER_DAEMON_ARGS &
+		dockerd $DOCKER_DAEMON_ARGS --storage-driver overlay2 &
 	fi
 	(( timeout = 60 + SECONDS ))
 	until docker info >/dev/null 2>&1
