@@ -29,6 +29,12 @@ VOLUME /var/lib/docker
 # group. Needed to access the docker daemon's unix socket.
 RUN usermod -a -G docker jenkins
 
+# Phabricator API
+RUN cd /opt; \
+    git clone https://github.com/phacility/arcanist.git; \
+    git clone https://github.com/phacility/libphutil.git; \
+    ln -s /opt/arcanist/bin/arc /usr/local/bin/arc
+
 COPY wrapdocker wrapdocker-setup-sshd /usr/local/bin/
 RUN chmod +x /usr/local/bin/wrapdocker /usr/local/bin/wrapdocker-setup-sshd
 RUN cat /usr/local/bin/wrapdocker /usr/local/bin/wrapdocker-setup-sshd
