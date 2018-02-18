@@ -33,7 +33,8 @@ RUN usermod -a -G docker jenkins
 RUN cd /opt; \
     git clone https://github.com/phacility/arcanist.git; \
     git clone https://github.com/phacility/libphutil.git; \
-    ln -s /opt/arcanist/bin/arc /usr/local/bin/arc
+    ln -s /opt/arcanist/bin/arc /usr/local/bin/arc; \
+    arc set-config default https://phabricator.gavinmogan.com
 
 COPY wrapdocker wrapdocker-setup-sshd /usr/local/bin/
 RUN chmod +x /usr/local/bin/wrapdocker /usr/local/bin/wrapdocker-setup-sshd
