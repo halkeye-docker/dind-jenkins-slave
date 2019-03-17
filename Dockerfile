@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -qqy \
     ca-certificates \
     curl \
     software-properties-common \
-    php5-cli \
-    php5-curl
+    php-cli \
+    php-curl
 RUN curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add - && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" && \
     apt-get update && \
