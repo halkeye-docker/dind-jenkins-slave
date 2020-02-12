@@ -6,40 +6,41 @@
 # Following the best practices outlined in:
 #   http://jonathan.bergknoff.com/journal/building-good-docker-images
 
-FROM jenkinsci/ssh-slave
+FROM jenkins/jnlp-slave:3.40-1
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# Adapted from: https://registry.hub.docker.com/u/jpetazzo/dind/dockerfile/
-# Let's start with some basic stuff.
-RUN apt-get update && apt-get install -qqy \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    software-properties-common \
-    php-cli \
-    php-curl
-RUN curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" && \
+USER root
+
+ENV GOSU_VERSION 1.11
+RUN set -x \
+  && curl -sSLo /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
+  && curl -sSLo /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
+  && export GNUPGHOME="$(mktemp -d)" \
+  && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+  && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+  && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+  && chmod +x /usr/local/bin/gosu \
+  && gosu nobody true
+
+RUN apt-get update && \
+    apt-get remove docker docker-engine docker.io; \
+    apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
     apt-get update && \
-    apt-get install -y docker-ce && \
+    apt-get install -qqy docker-ce docker-ce-cli containerd.io && \
     rm -rf /var/lib/apt/lists/*
 
 VOLUME /var/lib/docker
 
-# Make sure that the "jenkins" user from evarga's image is part of the "docker"
+# Make sure that the "jenkins" user from base's image is part of the "docker"
 # group. Needed to access the docker daemon's unix socket.
 RUN usermod -a -G docker jenkins
 
-# Phabricator API
-RUN cd /opt; \
-    git clone https://github.com/phacility/arcanist.git; \
-    git clone https://github.com/phacility/libphutil.git; \
-    ln -s /opt/arcanist/bin/arc /usr/local/bin/arc; \
-    arc set-config default https://phabricator.gavinmogan.com
 
-COPY wrapdocker wrapdocker-setup-sshd /usr/local/bin/
-RUN chmod +x /usr/local/bin/wrapdocker /usr/local/bin/wrapdocker-setup-sshd
-RUN cat /usr/local/bin/wrapdocker /usr/local/bin/wrapdocker-setup-sshd
-ENTRYPOINT ["/usr/local/bin/wrapdocker-setup-sshd"]
+COPY wrapdocker /usr/local/bin/
+RUN chmod +x /usr/local/bin/wrapdocker
+ENTRYPOINT ["/usr/local/bin/wrapdocker"]
+CMD ["bash"]
 

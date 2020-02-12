@@ -106,6 +106,6 @@ else
 		fi
 		sleep 1
 	done
-	[[ $1 ]] && exec "$@"
-	exec bash --login
+  exec /usr/local/bin/gosu jenkins /usr/local/bin/jenkins-agent $@
+  #exec /usr/local/bin/gosu jenkins "$@"
 fi
