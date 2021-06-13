@@ -1,17 +1,39 @@
+#!make
 .DEFAULT_GOAL := build
 
-NAME = dind-jenkins-slave
-TAGNAME = halkeye/$(NAME)
-VERSION = 3.40-1-dind-1
+ifndef REGISTRY
+	override REGISTRY = halkeye
+endif
+NAME := $(shell basename $(CURDIR))
+VERSION := latest
+NAME_VERSION := $(NAME):$(VERSION)
+TAGNAME := $(REGISTRY)/$(NAME_VERSION)
 
+.PHONY: version
+version: ## Show the current image version
+	@echo Image: $(TAGNAME)
+
+.PHONY: build
 build: ## Build docker image
-	docker build -t $(TAGNAME):$(VERSION) .
+	docker build -t $(TAGNAME) .
 
+.PHONY: push
 push: ## push to docker hub
-	docker push $(TAGNAME):$(VERSION)
+	docker push $(TAGNAME)
 
-run:
-	docker run -it --rm --privileged --name $(NAME) $(TAGNAME):$(VERSION)
+.PHONY: push
+kill: ## kill the running process
+	docker kill $(NAME)
+
+.SHELL := /bin/bash
+.PHONY: run
+run: ## run the docker hub
+	docker run \
+		-it \
+		--rm \
+		-p 3000:3000 \
+		--name $(NAME) \
+		$(TAGNAME)
 
 .PHONY: help
 help:
