@@ -42,5 +42,4 @@ RUN usermod -a -G docker jenkins
 COPY wrapdocker /usr/local/bin/
 RUN chmod +x /usr/local/bin/wrapdocker
 ENTRYPOINT ["/usr/local/bin/wrapdocker"]
-CMD ["bash"]
 

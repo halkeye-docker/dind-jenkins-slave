@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 # First, make sure that cgroups are mounted correctly.
 CGROUP=/sys/fs/cgroup
 : {LOG:=stdio}
@@ -106,6 +107,6 @@ else
 		fi
 		sleep 1
 	done
-  exec /usr/local/bin/gosu jenkins /usr/local/bin/jenkins-agent $@
+  exec /usr/local/bin/gosu jenkins /usr/local/bin/jenkins-agent "$@"
   #exec /usr/local/bin/gosu jenkins "$@"
 fi
